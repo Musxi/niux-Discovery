@@ -1,0 +1,5 @@
+{
+  "name": "niux-Discovery",
+  "description": "一个自动从 GitHub 获取最新热门项目，使用 Gemini AI 翻译和总结内容，并以精选列表形式展示的应用。",
+  "requestFramePermissions": []
+}
