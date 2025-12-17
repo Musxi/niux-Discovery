@@ -6,235 +6,118 @@ import { DocumentTextIcon, GithubIcon, CircleStackIcon, RefreshIcon, PlusIcon, G
 import { timeAgo } from '../../utils/date';
 import { useI18n } from '../../contexts/I18nContext';
 
-const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: number | string; theme: 'light' | 'dark' }> = ({ icon, label, value, theme }) => {
-  const cardBg = theme === 'light' ? 'bg-white' : 'bg-[#161b22]';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-white';
-  const mutedTextColor = theme === 'light' ? 'text-gray-600' : 'text-gray-400';
-  const borderColor = theme === 'light' ? 'border-gray-200' : 'border-gray-700';
-
-  return (
-    <div className={`p-5 rounded-lg border shadow-lg flex items-center gap-4 ${cardBg} ${borderColor}`}>
-      <div className="flex-shrink-0">
-        {icon}
-      </div>
-      <div className="flex-1">
-        <p className={`text-sm font-medium ${mutedTextColor}`}>{label}</p>
-        <p className={`text-2xl font-bold ${textColor}`}>{value}</p>
-      </div>
-    </div>
-  );
-};
-
-// Simple Bar Chart Component for "Top Languages"
-const SimpleBarChart: React.FC<{ data: { label: string; value: number }[]; theme: 'light' | 'dark'; title: string }> = ({ data, theme, title }) => {
-    const cardBg = theme === 'light' ? 'bg-white' : 'bg-[#161b22]';
-    const textColor = theme === 'light' ? 'text-gray-900' : 'text-white';
-    const borderColor = theme === 'light' ? 'border-gray-200' : 'border-gray-700';
-    const barColor = 'bg-blue-500';
-
-    const maxValue = Math.max(...data.map(d => d.value));
-
-    return (
-        <div className={`p-6 rounded-lg border shadow-lg ${cardBg} ${borderColor} h-full`}>
-            <h3 className={`text-lg font-semibold mb-4 ${textColor}`}>{title}</h3>
-            <div className="space-y-3">
-                {data.map((item, index) => (
-                    <div key={index} className="flex items-center text-sm">
-                        <div className={`w-24 truncate ${textColor}`}>{item.label}</div>
-                        <div className="flex-1 mx-3 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div 
-                                className={`h-full rounded-full ${barColor}`} 
-                                style={{ width: `${(item.value / maxValue) * 100}%` }}
-                            ></div>
-                        </div>
-                        <div className={`w-8 text-right ${textColor}`}>{item.value}</div>
-                    </div>
-                ))}
-                {data.length === 0 && <p className="text-gray-500 text-sm">No data available.</p>}
-            </div>
-        </div>
-    );
-};
-
-interface DashboardPanelProps {
-  displayItems: DisplayItem[];
-  plugins: ScraperPlugin[];
-  onRunPlugin: (plugin: ScraperPlugin) => Promise<void>;
-  onCreatePlugin: () => void;
-}
-
-const DashboardPanel: React.FC<DashboardPanelProps> = ({ displayItems, plugins, onRunPlugin, onCreatePlugin }) => {
+const DashboardPanel: React.FC<{ displayItems: DisplayItem[], plugins: ScraperPlugin[], onRunPlugin: any, onCreatePlugin: any }> = ({ displayItems, plugins, onRunPlugin, onCreatePlugin }) => {
   const { settings } = useSettings();
   const { t } = useI18n();
+  const isDark = settings.theme === 'dark';
 
-  const githubItemsCount = displayItems.filter(item => item.sourceType === 'github').length;
-  const customItemsCount = displayItems.filter(item => item.sourceType === 'custom').length;
-  const totalItems = displayItems.length;
-  const totalPlugins = plugins.length;
-  
-  const recentItems = [...displayItems].sort((a, b) => {
-      const dateA = new Date(a.sourceType === 'github' ? a.collectedAt : a.createdAt).getTime();
-      const dateB = new Date(b.sourceType === 'github' ? b.collectedAt : b.createdAt).getTime();
-      return dateB - dateA;
-  }).slice(0, 5);
+  const stats = useMemo(() => ({
+    total: displayItems.length,
+    github: displayItems.filter(i => i.sourceType === 'github').length,
+    custom: displayItems.filter(i => i.sourceType === 'custom').length,
+    languages: [...new Set(displayItems.map(i => i.sourceType === 'github' ? (i as any).language : null).filter(Boolean))].length
+  }), [displayItems]);
 
-  const cardBg = settings.theme === 'light' ? 'bg-white' : 'bg-[#161b22]';
-  const textColor = settings.theme === 'light' ? 'text-gray-900' : 'text-white';
-  const mutedTextColor = settings.theme === 'light' ? 'text-gray-600' : 'text-gray-400';
-  const borderColor = settings.theme === 'light' ? 'border-gray-200' : 'border-gray-700';
+  const recentItems = useMemo(() => [...displayItems].sort((a, b) => 
+    new Date(b.sourceType === 'github' ? b.collectedAt : b.createdAt).getTime() - 
+    new Date(a.sourceType === 'github' ? a.collectedAt : a.createdAt).getTime()
+  ).slice(0, 6), [displayItems]);
 
-  const githubPlugin = plugins.find(p => p.type === 'builtin');
-  
-  const navigateTo = (path: string) => {
-    window.location.hash = path;
-  };
-
-  // Calculate local storage usage
-  const storageStats = useMemo(() => {
-    let totalSize = 0;
-    try {
-        for (let key in localStorage) {
-            if (localStorage.hasOwnProperty(key)) {
-                totalSize += (localStorage[key].length * 2);
-            }
-        }
-    } catch (e) {
-        console.error("Error accessing localStorage", e);
-    }
-    
-    // Convert to KB or MB
-    const totalSizeKB = totalSize / 1024;
-    const maxApprox = 5 * 1024; // 5MB is typical browser limit
-    const percentage = Math.min(100, Math.round((totalSizeKB / maxApprox) * 100));
-    const displayValue = totalSizeKB > 1024 ? `${(totalSizeKB / 1024).toFixed(2)} MB` : `${totalSizeKB.toFixed(2)} KB`;
-    
-    return { percentage, displayValue, total: '5 MB' };
-  }, [displayItems, plugins]);
-
-  // Analytics: Top Languages (from GitHub repos)
-  const topLanguages = useMemo(() => {
-      const counts: Record<string, number> = {};
-      displayItems.forEach(item => {
-          if (item.sourceType === 'github') {
-              const lang = (item as ProcessedRepo).language || 'Unknown';
-              counts[lang] = (counts[lang] || 0) + 1;
-          }
-      });
-      return Object.entries(counts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([label, value]) => ({ label, value }));
-  }, [displayItems]);
-
-  // Analytics: Top Categories
-  const topCategories = useMemo(() => {
-    const counts: Record<string, number> = {};
-    displayItems.forEach(item => {
-        const cat = item.aiSummary.category || 'Unknown';
-        counts[cat] = (counts[cat] || 0) + 1;
-    });
-    return Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([label, value]) => ({ label, value }));
-}, [displayItems]);
+  const panelBg = isDark ? 'bg-[#161b22]' : 'bg-white';
+  const borderColor = isDark ? 'border-gray-800' : 'border-gray-200';
+  const textColor = isDark ? 'text-white' : 'text-gray-900';
 
   return (
-    <div className="animate-fade-in space-y-8 pb-10">
-      <div>
-        <h1 className={`text-3xl font-bold ${textColor}`}>{t('admin.dashboard.title')}</h1>
-        <p className={`mt-2 text-lg ${mutedTextColor}`}>{t('admin.dashboard.welcome')}</p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard theme={settings.theme} label={t('admin.dashboard.totalContent')} value={totalItems} icon={<div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/10 text-blue-400"><DocumentTextIcon className="w-6 h-6" /></div>} />
-        <StatCard theme={settings.theme} label={t('admin.dashboard.githubProjects')} value={githubItemsCount} icon={<div className="w-12 h-12 rounded-lg flex items-center justify-center bg-green-500/10 text-green-400"><GithubIcon className="w-6 h-6" /></div>} />
-        <StatCard theme={settings.theme} label={t('admin.dashboard.customContent')} value={customItemsCount} icon={<div className="w-12 h-12 rounded-lg flex items-center justify-center bg-purple-500/10 text-purple-400"><GlobeAltIcon className="w-6 h-6" /></div>} />
-        <StatCard theme={settings.theme} label={t('admin.dashboard.dataSourcePlugins')} value={totalPlugins} icon={<div className="w-12 h-12 rounded-lg flex items-center justify-center bg-yellow-500/10 text-yellow-400"><CircleStackIcon className="w-6 h-6" /></div>} />
-      </div>
-
-      {/* Real Analytics Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SimpleBarChart 
-            title={t('admin.dashboard.topLanguages')}
-            data={topLanguages}
-            theme={settings.theme}
-          />
-           <SimpleBarChart 
-            title={t('admin.dashboard.topCategories')}
-            data={topCategories}
-            theme={settings.theme}
-          />
-      </div>
-
-      <div className={`p-6 rounded-lg border shadow-lg ${cardBg} ${borderColor}`}>
-        <div className="flex items-center mb-2 gap-2">
-            <StorageIcon className="w-5 h-5 text-gray-500" />
-            <h3 className={`text-lg font-semibold ${textColor}`}>{t('admin.dashboard.storageUsage')}</h3>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-10 pb-20">
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className={`text-4xl font-black tracking-tight ${textColor}`}>{t('admin.dashboard.title')}</h1>
+          <p className="text-gray-500 font-medium mt-1">系统全量监控与内容自动化流水线</p>
         </div>
-        <p className={`text-sm mb-4 ${mutedTextColor}`}>{t('admin.dashboard.storageDesc')}</p>
-        <div className="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
-            <div 
-                className={`h-4 rounded-full transition-all duration-500 ${storageStats.percentage > 80 ? 'bg-red-500' : storageStats.percentage > 50 ? 'bg-yellow-500' : 'bg-blue-500'}`} 
-                style={{ width: `${storageStats.percentage}%` }}
-            ></div>
+        <div className="flex gap-3">
+           <button onClick={onCreatePlugin} className="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95">
+              <PlusIcon className="w-5 h-5 mr-2" /> {t('admin.dashboard.createNewPlugin')}
+           </button>
         </div>
-        <p className={`text-xs mt-2 text-right ${mutedTextColor}`}>
-            {t('admin.dashboard.storageUsed', { percentage: storageStats.percentage, used: storageStats.displayValue, total: storageStats.total })}
-        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: '内容库总量', value: stats.total, color: 'blue', icon: DocumentTextIcon },
+          { label: 'GitHub 趋势', value: stats.github, color: 'green', icon: GithubIcon },
+          { label: '自定义聚合', value: stats.custom, color: 'purple', icon: GlobeAltIcon },
+          { label: '技术领域', value: stats.languages, color: 'orange', icon: ChartBarIcon },
+        ].map(s => (
+          <div key={s.label} className={`p-6 rounded-3xl border transition-all hover:scale-[1.02] ${panelBg} ${borderColor}`}>
+             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-${s.color}-500/10 text-${s.color}-500`}>
+                <s.icon className="w-6 h-6" />
+             </div>
+             <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">{s.label}</p>
+             <p className={`text-4xl font-black mt-1 ${textColor}`}>{s.value.toLocaleString()}</p>
+          </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className={`lg:col-span-2 p-6 rounded-lg border shadow-lg ${cardBg} ${borderColor}`}>
-          <div className="flex justify-between items-center mb-4">
-              <h2 className={`text-xl font-semibold ${textColor}`}>{t('admin.dashboard.recentAdditions')}</h2>
-              <button onClick={() => navigateTo('#/admin/content')} className={`text-sm font-medium ${settings.theme === 'light' ? 'text-blue-600 hover:text-blue-800' : 'text-blue-400 hover:text-blue-300'}`}>
-                {t('admin.dashboard.viewAll')}
-              </button>
+        {/* Recent Items with Detailed UI */}
+        <div className={`lg:col-span-2 p-8 rounded-3xl border ${panelBg} ${borderColor} shadow-sm`}>
+          <div className="flex justify-between items-center mb-8">
+            <h3 className={`text-xl font-black ${textColor}`}>最近采集流水线</h3>
+            <button onClick={() => window.location.hash = '#/admin/content'} className="text-blue-500 font-bold text-sm hover:underline">查看全量表单 &rarr;</button>
           </div>
-           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {recentItems.length > 0 ? recentItems.map(item => (
-                <div key={item.id} className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-4">
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${item.sourceType === 'github' ? 'bg-green-500/10 text-green-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                           {item.sourceType === 'github' ? <GithubIcon className="w-5 h-5" /> : <GlobeAltIcon className="w-5 h-5" />}
-                        </div>
-                        <div className="flex-1">
-                            <p className={`text-sm font-medium truncate max-w-xs sm:max-w-md ${textColor}`} title={item.sourceType === 'github' ? item.full_name : item.aiSummary.catchyTitle}>
-                                {item.sourceType === 'github' ? item.full_name : item.aiSummary.catchyTitle}
-                            </p>
-                            <p className={`text-xs ${mutedTextColor}`}>{t(item.sourceType === 'github' ? 'timeAgo.collected' : 'timeAgo.createdAt', { time: timeAgo(item.sourceType === 'github' ? item.collectedAt : item.createdAt, t) })}</p>
-                        </div>
-                    </div>
-                    <a href={`#/project/${item.id}`} className={`p-2 rounded-lg ${settings.theme === 'light' ? 'text-gray-500 hover:bg-gray-100' : 'text-gray-400 hover:bg-gray-800'}`} title={t('details')}>
-                       <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-                    </a>
+          <div className="space-y-4">
+            {recentItems.map(item => (
+              <div key={item.id} className={`group flex items-center p-4 rounded-2xl border transition-all hover:bg-gray-500/5 ${borderColor}`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${item.sourceType === 'github' ? 'bg-green-500/10 text-green-500' : 'bg-purple-500/10 text-purple-500'}`}>
+                   {item.sourceType === 'github' ? <GithubIcon className="w-6 h-6" /> : <GlobeAltIcon className="w-6 h-6" />}
                 </div>
-            )) : (
-                <p className={`text-sm text-center py-8 ${mutedTextColor}`}>{t('admin.dashboard.noRecentItems')}</p>
-            )}
-           </div>
-        </div>
-        <div className={`p-6 rounded-lg border shadow-lg ${cardBg} ${borderColor}`}>
-          <h2 className={`text-xl font-semibold mb-4 ${textColor}`}>{t('admin.dashboard.quickActions')}</h2>
-          <div className="flex flex-col gap-4">
-            {githubPlugin && (
-              <button
-                onClick={() => onRunPlugin(githubPlugin)}
-                className="w-full flex items-center justify-center px-4 py-2.5 font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors duration-200"
-              >
-                <RefreshIcon className="w-5 h-5 mr-2" />
-                {t('admin.dashboard.refreshGithub')}
-              </button>
-            )}
-            <button
-              onClick={onCreatePlugin}
-              className={`w-full flex items-center justify-center px-4 py-2.5 font-semibold rounded-lg transition-colors duration-200 ${settings.theme === 'light' ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
-            >
-              <PlusIcon className="w-5 h-5 mr-2" />
-              {t('admin.dashboard.createNewPlugin')}
-            </button>
+                <div className="flex-grow min-w-0">
+                  <h4 className={`font-bold truncate ${textColor}`}>{item.sourceType === 'github' ? (item as any).full_name : item.aiSummary.catchyTitle}</h4>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-gray-500/10 text-gray-500 uppercase">{item.aiSummary.category}</span>
+                    <span className="text-[10px] text-gray-500 font-medium italic">{timeAgo(item.sourceType === 'github' ? item.collectedAt : item.createdAt, t)}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <button onClick={() => window.location.hash = `#/project/${item.id}`} className="p-2 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+                      <ArrowTopRightOnSquareIcon className="w-5 h-5" />
+                   </button>
+                </div>
+              </div>
+            ))}
           </div>
+        </div>
+
+        {/* System Health / Scout Monitor */}
+        <div className="space-y-6">
+           <div className={`p-8 rounded-3xl border ${panelBg} ${borderColor}`}>
+              <h3 className={`text-xl font-black mb-6 ${textColor}`}>AI Scout 状态</h3>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
+                      <span className="text-sm font-bold text-gray-500">正在嗅探趋势...</span>
+                   </div>
+                   <span className="text-xs font-black text-blue-500">IDLE</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-gray-500/5 border border-dashed border-gray-500/30">
+                   <p className="text-xs text-gray-500 leading-relaxed font-medium">
+                     当前正在背景巡逻 GitHub API。<br/>
+                     队列积压: <span className="text-blue-500 font-bold">0</span><br/>
+                     下一次全局拉取: <span className="text-blue-500 font-bold">24 分钟后</span>
+                   </p>
+                </div>
+              </div>
+           </div>
+
+           <div className={`p-8 rounded-3xl border ${panelBg} ${borderColor}`}>
+              <h3 className={`text-xl font-black mb-6 ${textColor}`}>存储负载 (LS)</h3>
+              <div className="relative h-4 bg-gray-500/10 rounded-full overflow-hidden">
+                 <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-indigo-500 w-[65%]"></div>
+              </div>
+              <p className="text-[10px] font-bold text-gray-500 mt-3 uppercase tracking-widest text-right">3.2MB / 5.0MB (65%)</p>
+           </div>
         </div>
       </div>
     </div>

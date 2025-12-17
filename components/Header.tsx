@@ -18,14 +18,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ inputValue, onInputChange, onSear
   return (
     <form onSubmit={onSearchSubmit} className="relative w-full h-full">
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-        <SearchIcon className={`h-5 w-5 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`} />
+        <SearchIcon className={`h-4 w-4 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`} />
       </div>
       <input
         type="search"
         placeholder={placeholder}
         value={inputValue}
         onChange={onInputChange}
-        className={`block w-full rounded-md border-0 h-full pl-10 pr-8 transition-colors duration-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm ${
+        className={`block w-full rounded-xl border-0 h-full pl-9 pr-8 transition-all duration-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm ${
           theme === 'light'
             ? 'bg-gray-100 text-gray-900 placeholder:text-gray-400'
             : 'bg-gray-800 text-gray-200 placeholder:text-gray-500'
@@ -36,9 +36,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ inputValue, onInputChange, onSear
           type="button"
           onClick={onClearSearch}
           className="absolute inset-y-0 right-0 flex items-center pr-3"
-          aria-label="Clear search"
         >
-          <XMarkIcon className={`h-5 w-5 transition-colors ${theme === 'light' ? 'text-gray-500 hover:text-gray-700' : 'text-gray-400 hover:text-gray-200'}`} />
+          <XMarkIcon className={`h-4 w-4 transition-colors ${theme === 'light' ? 'text-gray-500 hover:text-gray-700' : 'text-gray-400 hover:text-gray-200'}`} />
         </button>
       )}
     </form>
@@ -49,151 +48,83 @@ const SearchBar: React.FC<SearchBarProps> = ({ inputValue, onInputChange, onSear
 interface HeaderProps {
   onRefresh: () => void;
   isLoading: boolean;
-  lastUpdated?: Date | null;
+  isScouting?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, lastUpdated }) => {
+const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, isScouting }) => {
   const { settings } = useSettings();
   const { t } = useI18n();
   const [mobileSearchVisible, setMobileSearchVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
-  useEffect(() => {
-    const handleHashChange = () => {
-        const hash = window.location.hash;
-        const match = hash.match(/#\/search\?q=([^&]*)/);
-        if (match && match[1]) {
-            setInputValue(decodeURIComponent(match[1]));
-        } else {
-            if (!hash.startsWith('#/search')) {
-                setInputValue('');
-            }
-        }
-    };
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputValue.trim()) {
-      window.location.hash = `#/search?q=${encodeURIComponent(inputValue.trim())}`;
-      if (mobileSearchVisible) {
-        setMobileSearchVisible(false);
-      }
-    }
-  };
-  
-  const handleClearSearch = () => {
-    setInputValue('');
-    if (window.location.hash.startsWith('#/search')) {
-        window.location.hash = '#';
-    }
-  }
-
-  const navigate = (hash: string) => {
-    window.location.hash = hash;
-  };
+  const navigate = (hash: string) => { window.location.hash = hash; };
 
   return (
-    <header className={`border-b sticky top-0 z-20 transition-colors duration-300 ${settings.theme === 'light' ? 'bg-white border-gray-200' : 'bg-[#161b22] border-gray-700'}`}>
+    <header className={`border-b sticky top-0 z-20 backdrop-blur-xl transition-all duration-300 ${settings.theme === 'light' ? 'bg-white/80 border-gray-200' : 'bg-[#161b22]/80 border-gray-700'}`}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className={`flex-grow justify-between items-center ${mobileSearchVisible ? 'hidden' : 'flex'} sm:flex`}>
-          <div
-            onClick={() => navigate('#')}
-            className="flex items-center space-x-3 cursor-pointer"
-          >
-            {settings.logoUrl ? (
-                <img src={settings.logoUrl} alt={settings.siteName} className="w-9 h-9 object-contain rounded-md" />
-            ) : (
-                <GithubIcon className={`w-9 h-9 transition-colors duration-300 ${settings.theme === 'light' ? 'text-gray-800' : 'text-white'}`} />
-            )}
+          <div onClick={() => navigate('#')} className="flex items-center space-x-3 cursor-pointer group">
+            <div className="relative">
+              {settings.logoUrl ? (
+                <img src={settings.logoUrl} alt={settings.siteName} className="w-9 h-9 object-contain rounded-xl" />
+              ) : (
+                <div className={`p-2 rounded-xl transition-colors ${settings.theme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'}`}>
+                  <GithubIcon className="w-5 h-5" />
+                </div>
+              )}
+              {isScouting && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+              )}
+            </div>
             
             <div className="flex flex-col">
-                <h1 className={`text-xl font-bold tracking-wider transition-colors duration-300 hidden sm:block ${settings.theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
-                  {settings.siteName}
-                </h1>
-                {lastUpdated && (
-                    <span className={`text-[10px] hidden sm:block ${settings.theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-                        {t('lastUpdated', { time: lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}
-                    </span>
-                )}
+              <h1 className={`text-lg font-black tracking-tighter transition-colors ${settings.theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                {settings.siteName}
+              </h1>
+              {isScouting && <span className="text-[10px] text-green-500 font-bold leading-none animate-pulse">AI SCOUTING...</span>}
             </div>
           </div>
-          <div className="flex items-center space-x-1 sm:space-x-3">
+
+          <div className="flex items-center space-x-2">
             {settings.isSearchEnabled && (
-              <>
-                <div className="hidden sm:block w-48 lg:w-64 h-10">
-                    <SearchBar 
-                        inputValue={inputValue}
-                        onInputChange={(e) => setInputValue(e.target.value)}
-                        onSearchSubmit={handleSearchSubmit}
-                        onClearSearch={handleClearSearch}
-                        theme={settings.theme}
-                        placeholder={t('searchPlaceholder')}
-                    />
-                </div>
-                <button
-                    onClick={() => setMobileSearchVisible(true)}
-                    className={`p-2 h-10 w-10 flex items-center justify-center rounded-lg sm:hidden ${settings.theme === 'light' ? 'hover:bg-gray-200 text-gray-600' : 'hover:bg-gray-700 text-gray-300'}`}
-                >
-                    <SearchIcon className="w-6 h-6" />
-                </button>
-              </>
+              <div className="hidden sm:block w-48 lg:w-72 h-9">
+                <SearchBar 
+                  inputValue={inputValue}
+                  onInputChange={(e) => setInputValue(e.target.value)}
+                  onSearchSubmit={(e) => { e.preventDefault(); if (inputValue.trim()) navigate(`#/search?q=${encodeURIComponent(inputValue.trim())}`); }}
+                  onClearSearch={() => { setInputValue(''); if (window.location.hash.startsWith('#/search')) navigate('#'); }}
+                  theme={settings.theme}
+                  placeholder={t('searchPlaceholder')}
+                />
+              </div>
             )}
+            
             <button
               onClick={onRefresh}
               disabled={isLoading}
-              className={`flex items-center h-10 px-4 font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
-              ${settings.theme === 'light' 
-                ? 'bg-transparent hover:bg-gray-200 disabled:bg-gray-100 text-gray-800 disabled:text-gray-400' 
-                : 'bg-transparent hover:bg-gray-700 disabled:bg-gray-800 text-white disabled:cursor-not-allowed'
-              }`}
+              className={`p-2 rounded-xl transition-all active:scale-90 ${settings.theme === 'light' ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-gray-800 text-gray-300'}`}
+              title={t('refresh')}
             >
               <RefreshIcon className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="ml-2 hidden sm:inline">{isLoading ? t('refreshing') : t('refresh')}</span>
             </button>
             <LanguageSwitcher />
-            <div id="google_translate_element"></div>
-             <button
+            <button
               onClick={() => navigate('#/help')}
-              title={t('helpCenter')}
-              className={`p-2 h-10 w-10 flex items-center justify-center rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${settings.theme === 'light' ? 'hover:bg-gray-200 text-gray-600' : 'hover:bg-gray-700 text-gray-300'}`}
+              className={`p-2 rounded-xl transition-all active:scale-90 ${settings.theme === 'light' ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-gray-800 text-gray-300'}`}
             >
-              <QuestionMarkCircleIcon className="w-6 h-6" />
+              <QuestionMarkCircleIcon className="w-5 h-5" />
             </button>
             <button
               onClick={() => navigate('#/admin')}
-              title={t('adminDashboard')}
-              className={`p-2 h-10 w-10 flex items-center justify-center rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${settings.theme === 'light' ? 'hover:bg-gray-200 text-gray-600' : 'hover:bg-gray-700 text-gray-300'}`}
+              className={`p-2 rounded-xl transition-all active:scale-90 ${settings.theme === 'light' ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-gray-800 text-gray-300'}`}
             >
-              <Cog6ToothIcon className="w-6 h-6" />
+              <Cog6ToothIcon className="w-5 h-5" />
             </button>
           </div>
         </div>
-
-        {settings.isSearchEnabled && (
-          <div className={`w-full items-center gap-x-2 ${mobileSearchVisible ? 'flex' : 'hidden'} sm:hidden`}>
-            <div className="flex-grow h-10">
-               <SearchBar 
-                  inputValue={inputValue}
-                  onInputChange={(e) => setInputValue(e.target.value)}
-                  onSearchSubmit={handleSearchSubmit}
-                  onClearSearch={handleClearSearch}
-                  theme={settings.theme}
-                  placeholder={t('searchPlaceholder')}
-              />
-            </div>
-            <button
-              onClick={() => setMobileSearchVisible(false)}
-              className="p-2 h-10 w-10 flex items-center justify-center rounded-lg"
-              aria-label="Close search"
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </div>
-        )}
       </div>
     </header>
   );

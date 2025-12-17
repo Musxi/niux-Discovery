@@ -111,9 +111,10 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, isModal = false 
             )}
             
             <div className={`prose prose-lg max-w-none ${settings.theme === 'light' ? 'prose-gray' : 'prose-invert'}`}>
-                 <h2 className={`text-2xl font-semibold border-b pb-2 mb-4 ${textClass} ${borderClass}`}>{t('aiSummary')}</h2>
-                 
-                <p className={textClass}>{project.aiSummary.introduction}</p>
+                <p className={`text-xl font-medium mb-8 ${textClass} opacity-90 leading-relaxed italic`}>
+                    {project.aiSummary.introduction}
+                </p>
+                
                 <h3 className={`text-xl font-semibold mt-4 ${textClass}`}>{t('highlights')}</h3>
                 <ul className={textClass}>
                     {project.aiSummary.coreFeatures.map((feature, index) => (

@@ -21,9 +21,9 @@
   "goBack": "← 返回列表",
   "viewOnGithub": "在 GitHub 上查看",
   "viewOriginal": "查看原文",
-  "aiSummary": "AI 生成的摘要",
-  "highlights": "💡 亮点功能",
-  "techStack": "🛠️ 技术栈",
+  "aiSummary": "项目概览",
+  "highlights": "💡 核心亮点",
+  "techStack": "🛠️ 关键技术",
   "projectReadme": "项目 README",
   "projectNotFound": "项目未找到或已被删除。",
   "searchResultsTitle": "搜索结果: {query}",
@@ -52,7 +52,7 @@
     "start": "检测到 {count} 个项目需要翻译，正在处理...",
     "success": "{count} 个项目已成功翻译为当前语言！",
     "error": "{count} 个项目翻译失败，请检查您的网络或 API 密钥。",
-    "translateReadme": "AI 翻译全文",
+    "translateReadme": "全文翻译",
     "translating": "正在翻译...",
     "translated": "已翻译",
     "readmeSuccess": "README 翻译成功！",
@@ -60,9 +60,9 @@
   },
 
   "fallback": {
-    "catchyTitle": "AI 摘要生成失败",
+    "catchyTitle": "内容加载失败",
     "category": "未知",
-    "introduction": "无法加载此项目的 AI 生成介绍。请稍后刷新重试。",
+    "introduction": "无法加载此项目的介绍。请稍后刷新重试。",
     "coreFeatures": "内容分析时出现错误。",
     "techStack": "未知"
   },
@@ -128,7 +128,7 @@
       "title": "数据源插件",
       "description": "管理内置和自定义的数据源插件。可为每个插件独立配置 AI 模型。",
       "demoNoteTitle": "功能演示说明：",
-      "demoNote": "由于浏览器安全限制，自定义插件目前为模拟运行。点击“运行”将使用预设的示例文本，并调用 AI 进行处理，以完整展示 AI 的内容分析、分类和重写能力。",
+      "demoNote": "由于浏览器安全限制，自定义插件目前为模拟运行。点击“运行”将使用预设的示例文本，并调用内容分析、分类和重写能力。",
       "pluginTypeBuiltin": "内置插件",
       "pluginTypeCustom": "创建于 {time}",
       "run": "运行",
@@ -142,9 +142,9 @@
     },
     "settings": {
       "title": "全局设置",
-      "description": "自定义您的应用体验。AI 模型配置现已合并到 API 密钥设置中。",
-      "aiConfigTitle": "🤖 AI 配置",
-      "aiConfigDesc": "管理 API 密钥及其对应的 AI 模型。支持 Gemini 及所有 OpenAI 兼容接口（如 DeepSeek, Moonshot）。",
+      "description": "自定义您的应用体验。模型配置现已合并到 API 密钥设置中。",
+      "aiConfigTitle": "🤖 模型配置",
+      "aiConfigDesc": "管理 API 密钥及其对应的模型。支持 Gemini 及所有 OpenAI 兼容接口（如 DeepSeek）。",
       "githubTokenTitle": "🐙 GitHub API 配置 (推荐)",
       "githubToken": "GitHub Access Token",
       "githubTokenDesc": "配置 Token 可将每小时请求限额从 60 次提升至 5000 次，彻底解决“加载失败”问题。",
@@ -161,7 +161,7 @@
       "logoUrl": "网站 Logo URL",
       "logoUrlPlaceholder": "https://example.com/logo.png (留空使用默认图标)",
       "globalApiKeys": "API 密钥管理",
-      "apiKeysDescription": "按优先级顺序添加密钥。请为每个密钥指定其适用的模型（如 gpt-4o, deepseek-chat, gemini-2.5-flash）。",
+      "apiKeysDescription": "按优先级顺序添加密钥。请为每个密钥指定其适用的模型（如 gpt-4o, deepseek-chat, gemini-3-flash-preview）。",
       "addApiKey": "添加一个密钥",
       "apiKeyNamePlaceholder": "备注名称",
       "apiKeyNameDefault": "密钥",
@@ -178,8 +178,8 @@
       "keyStatusValid": "有效",
       "keyStatusInvalid": "无效",
       "keyStatusUnchecked": "未检查",
-      "defaultModel": "默认 AI 模型",
-      "modelPlaceholder": "例如: gemini-2.5-flash, gpt-4o, deepseek-chat",
+      "defaultModel": "默认模型",
+      "modelPlaceholder": "例如: gemini-3-flash-preview, gpt-4o",
       "theme": "主题",
       "themeDark": "深色模式",
       "themeLight": "浅色模式",
@@ -200,16 +200,16 @@
 
   "modals": {
     "editProject": {
-      "title": "编辑项目摘要",
+      "title": "编辑摘要",
       "catchyTitle": "吸引人的标题",
       "category": "分类",
-      "introduction": "项目简介",
-      "coreFeatures": "核心功能 (每行一个)",
+      "introduction": "简介",
+      "coreFeatures": "亮点 (每行一个)",
       "techStack": "技术栈",
-      "aiOptimize": "AI 辅助优化",
+      "aiOptimize": "智能辅助优化",
       "optimizePrompt": "优化提示词 (可选)",
       "optimizePlaceholder": "例如：让语气更活泼，重点突出对开发者的价值",
-      "regenerate": "AI 重新生成",
+      "regenerate": "重新生成",
       "regenerating": "正在重新生成...",
       "history": "修改历史 ({count})",
       "modifiedAt": "修改于: {time}",
@@ -218,8 +218,8 @@
       "save": "保存更改",
       "cancel": "取消",
       "apiKeyWarning": "请配置 API 密钥以使用此功能。",
-      "regenerateError": "AI 摘要重新生成失败，请稍后重试。",
-      "regenerateFail": "AI 摘要重新生成失败，请检查 API 密钥或网络。"
+      "regenerateError": "重新生成失败，请稍后重试。",
+      "regenerateFail": "重新生成失败，请检查 API 密钥或网络。"
     },
     "editPlugin": {
       "createTitle": "创建新插件",
@@ -233,15 +233,15 @@
       "instructionPlaceholder": "例如: 抓取页面上所有文章的标题和摘要并进行总结",
       "testConfig": "测试配置",
       "testing": "测试中...",
-      "testSuccess": "测试成功！AI 预览:",
+      "testSuccess": "测试成功！预览:",
       "testError": "测试失败:",
-      "advancedConfig": "高级 AI 配置 (可选)",
-      "advancedNote": "如果填写，将覆盖设置页面中的全局 AI 设置。留空则使用全局设置。",
-      "provider": "AI 提供商",
+      "advancedConfig": "高级配置 (可选)",
+      "advancedNote": "如果填写，将覆盖设置页面中的全局设置。留空则使用全局设置。",
+      "provider": "提供商",
       "baseUrl": "API Base URL",
       "apiKey": "API 密钥",
       "apiKeyPlaceholder": "留空使用全局密钥",
-      "model": "AI 模型",
+      "model": "模型",
       "modelGlobal": "使用全局模型",
       "save": "保存",
       "cancel": "取消",
@@ -252,22 +252,22 @@
   "help": {
       "intro": {
           "title": "Niux-Discovery 帮助中心",
-          "subtitle": "您的 AI 驱动的 GitHub 探索和内容聚合平台。",
-          "description": "Niux-Discovery 是一个开源的 Web 应用，旨在帮助您自动发现、翻译和总结 GitHub 上的热门项目或自定义网页内容。通过集成 Gemini 或 OpenAI 的强大能力，它能将复杂的技术文档转化为通俗易懂的中文介绍。"
+          "subtitle": "您的 GitHub 探索和内容聚合平台。",
+          "description": "Niux-Discovery 是一个开源的 Web 应用，旨在帮助您自动发现、翻译和总结 GitHub 上的热门项目或自定义网页内容。它能将复杂的技术文档转化为通俗易懂的专业介绍。"
       },
       "quickStart": {
-          "title": "1. 快速开始 (配置 API)",
-          "desc": "在使用任何 AI 功能之前，您必须配置 API 密钥。这是最重要的一步。",
+          "title": "1. 快速开始 (配置模型)",
+          "desc": "在使用任何功能之前，您必须配置 API 密钥。这是最重要的一步。",
           "step1": "点击右上角的 **齿轮图标** 或 **管理后台** 按钮进入设置页面。",
-          "step2": "在“AI 配置”部分，点击 **添加一个密钥**。",
+          "step2": "在“模型配置”部分，点击 **添加一个密钥**。",
           "step3": "选择提供商 (Google Gemini 或 OpenAI 兼容)。",
           "step4": "输入您的 API Key。如果是 OpenAI 兼容接口（如 DeepSeek），还需要填写 **Base URL**。",
-          "step5": "输入适用的模型名称 (例如: gemini-2.5-flash, gpt-4o, deepseek-chat)。",
+          "step5": "输入适用的模型名称 (例如: gemini-3-flash-preview, gpt-4o, deepseek-chat)。",
           "step6": "点击 **保存所有设置**。"
       },
       "browsing": {
           "title": "2. 浏览与发现",
-          "categoryDesc": "使用顶部的分类栏快速筛选感兴趣的技术领域 (如前端、人工智能)。",
+          "categoryDesc": "使用顶部的分类栏快速筛选感兴趣的技术领域 (如前端探索、人工智能)。",
           "viewModeDesc": "点击右上角的图标切换 **网格视图** 或 **列表视图**。",
           "searchDesc": "在搜索框输入关键词，即可实时检索所有已采集项目的标题、简介和技术栈。"
       },
@@ -275,8 +275,8 @@
           "title": "3. 项目深度阅读",
           "desc": "点击任意卡片进入详情页。",
           "features": [
-              "**AI 摘要**: 阅读由 AI 生成的通俗简介和核心亮点。",
-              "**翻译 Readme**: 点击“AI 翻译全文”按钮，将原始英文文档一键翻译为中文。",
+              "**智能摘要**: 阅读专业的通俗简介和核心亮点。",
+              "**一键翻译**: 点击“全文翻译”按钮，将原始英文文档翻译为中文。",
               "**原文跳转**: 点击“在 GitHub 上查看”可直接访问源码仓库。"
           ]
       },
@@ -284,8 +284,8 @@
           "title": "4. 管理后台功能",
           "access": "点击顶部导航栏的 **齿轮图标** 进入。",
           "dashboard": "**仪表盘**: 查看内容统计、存储占用，并执行“刷新 GitHub”等快捷操作。",
-          "content": "**内容管理**: 查看所有已抓取的内容。支持搜索、批量删除、以及手动编辑 AI 生成的摘要 (支持 AI 重新生成)。",
-          "plugins": "**数据源插件**: 管理抓取源。除了内置的 GitHub 热门项目抓取，您还可以创建“自定义插件”，通过输入 URL 和指令，让 AI 帮您抓取并总结任意网页内容。",
+          "content": "**内容管理**: 查看所有已抓取的内容。支持搜索、批量删除、以及手动编辑 (支持智能重新生成)。",
+          "plugins": "**数据源插件**: 管理抓取源。除了内置的 GitHub 热门项目抓取，您还可以创建“自定义插件”，通过输入 URL 和指令，总结任意网页内容。",
           "settings": "**设置**: 管理 API 密钥、修改网站名称/Logo、设置后台密码、切换深色模式等。"
       },
       "security": {
