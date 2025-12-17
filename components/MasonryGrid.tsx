@@ -13,11 +13,18 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({ items, searchQuery }) => {
 
   useEffect(() => {
     const updateColumns = () => {
-      if (window.innerWidth >= 1024) setColumns(3);
-      else if (window.innerWidth >= 768) setColumns(2);
-      else setColumns(1);
+      // Tailwind breakpoints: md: 768px, lg: 1024px
+      if (window.innerWidth >= 1024) {
+        setColumns(3);
+      } else if (window.innerWidth >= 768) {
+        setColumns(2);
+      } else {
+        setColumns(1);
+      }
     };
+
     updateColumns();
+    // Add debounce could be better, but for simple logic this is fine
     window.addEventListener('resize', updateColumns);
     return () => window.removeEventListener('resize', updateColumns);
   }, []);
@@ -31,13 +38,11 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({ items, searchQuery }) => {
   }, [items, columns]);
 
   return (
-    <div className="flex gap-6 items-start transition-opacity duration-300">
+    <div className="flex gap-6 items-start">
       {columnWrappers.map((colItems, colIndex) => (
-        <div key={`col-${colIndex}-${items.length}`} className="flex-1 flex flex-col gap-6 min-w-0">
+        <div key={colIndex} className="flex-1 flex flex-col gap-6 w-full min-w-0">
           {colItems.map((item) => (
-            <div key={`${item.sourceType}-${item.id}`} className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <ProjectCard project={item} searchQuery={searchQuery} />
-            </div>
+            <ProjectCard key={item.id} project={item} searchQuery={searchQuery} />
           ))}
         </div>
       ))}
